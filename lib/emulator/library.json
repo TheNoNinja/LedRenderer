@@ -1,0 +1,9 @@
+{
+  "name": "Emulator",
+  "version": "1.0.0",
+  "description": "Emulator for led rendering engine",
+  "platforms": "native",
+  "dependencies": {
+    "led_engine": "*"
+  }
+}
