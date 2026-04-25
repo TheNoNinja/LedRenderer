@@ -6,10 +6,11 @@
 #include "rendering/renderer.h"
 
 namespace Emulator {
-    bool ShouldQuit = false;
+    static bool ShouldQuit = false;
     static SDL_Window* Window = nullptr;
     static SDL_GLContext GlContext = nullptr;
     static Pixel* Pixels = nullptr;
+    static Color* Colors = nullptr;
     static size_t NumberOfPixels = 0;
 
     Renderer renderer;
@@ -32,10 +33,7 @@ namespace Emulator {
         SDL_Quit();
     }
 
-    bool init(const int windowWidth, const int windowHeight, Pixel* pixels, const size_t numberOfPixels) {
-        Pixels = pixels;
-        NumberOfPixels = numberOfPixels;
-
+    bool init(const int windowWidth, const int windowHeight) {
         if (!SDL_Init(SDL_INIT_VIDEO)) {
             logSdlError("SDL_Init failed");
             cleanPartialInit();
@@ -78,7 +76,7 @@ namespace Emulator {
         return true;
     }
 
-    void render(const Color* colors) {
+    void render() {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT || e.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
@@ -89,7 +87,7 @@ namespace Emulator {
             renderer.onEvent(e);
         }
 
-        renderer.render(Pixels, colors, NumberOfPixels);
+        renderer.render(Pixels, Colors, NumberOfPixels);
 
         SDL_GL_SwapWindow(Window);
     }
@@ -98,5 +96,22 @@ namespace Emulator {
         SDL_GL_DestroyContext(GlContext);
         SDL_DestroyWindow(Window);
         SDL_Quit();
+    }
+
+    int run(const int windowWidth, const int windowHeight, Pixel* pixels, Color* colors, const size_t numberOfPixels) {
+        Pixels = pixels;
+        NumberOfPixels = numberOfPixels;
+        Colors = colors;
+
+        setup();
+        if (!init(windowWidth, windowHeight)) return 1;
+
+        while (!ShouldQuit) {
+            loop();
+            render();
+        }
+
+        shutdown();
+        return 0;
     }
 }

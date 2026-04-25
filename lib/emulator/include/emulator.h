@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <SDL3/SDL.h>
 
+void setup();
+void loop();
+
 namespace Emulator {
-    extern bool ShouldQuit;
-    bool init(int windowWidth, int windowHeight, Pixel* pixels, std::size_t numberOfPixels);
-    void render(const Color* colors);
-    void shutdown();
+    int run(int windowWidth, int windowHeight, Pixel* pixels, Color* colors, std::size_t numberOfPixels);
 }
 
 inline float millis() {
-    return static_cast<float>(SDL_GetTicks()) / 1000.0f;
+    return static_cast<float>(SDL_GetTicks());
 }
