@@ -4,6 +4,7 @@
   "description": "Emulator for led rendering engine",
   "platforms": "native",
   "dependencies": {
-    "led_engine": "*"
+    "led_engine": "*",
+    "imgui": "*"
   }
 }
