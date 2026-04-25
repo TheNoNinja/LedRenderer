@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 
 #include "rendering/renderer.h"
+#include "user_interface/user_interface.h"
 
 namespace Emulator {
     static bool ShouldQuit = false;
@@ -72,6 +73,12 @@ namespace Emulator {
             logSdlError("SDL_GL_SetSwapInterval failed");
         }
 
+        if (!UserInterface::init(Window, &GlContext)) {
+            fprintf(stderr, "UserInterface::init() failed");
+            cleanPartialInit();
+            return false;
+        }
+
         renderer = Renderer(windowWidth, windowHeight);
         return true;
     }
@@ -84,15 +91,20 @@ namespace Emulator {
                 return;
             }
 
+            if (UserInterface::onEvent(e)) continue;
+
             renderer.onEvent(e);
         }
 
         renderer.render(Pixels, Colors, NumberOfPixels);
+        UserInterface::render();
+
 
         SDL_GL_SwapWindow(Window);
     }
 
     void shutdown() {
+        UserInterface::shutdown();
         SDL_GL_DestroyContext(GlContext);
         SDL_DestroyWindow(Window);
         SDL_Quit();
