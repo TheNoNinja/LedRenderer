@@ -1,0 +1,6 @@
+{
+  "name": "glad",
+  "version": "3.0-compatibility",
+  "description": "OpenGL function loader",
+  "platforms": "native"
+}

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <SDL3/SDL_opengl.h>
+#include <glad/glad.h>
 
 #define POINT_SIZE 8.0f
 

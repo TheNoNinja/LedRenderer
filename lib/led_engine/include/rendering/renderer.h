@@ -9,7 +9,14 @@
 template<int PIXEL_COUNT, std::size_t MAX_EFFECTS = 8>
 class Renderer {
 public:
-    explicit Renderer(const Pixel* pixels) : mPixels(pixels) {}
+    explicit Renderer(const Pixel* pixels, const float targetFps) : mPixels(pixels) {
+        setTargetFps(targetFps);
+    }
+
+    void setTargetFps(const float fps) {
+        mTargetFps = fps;
+        mFixedDeltaTime = fps > 0.0f ? 1.0f / fps : 0.0f;
+    }
 
     bool addEffect(Effect* effect) {
         if (mNumberOfEffects >= MAX_EFFECTS) return false;
@@ -46,6 +53,55 @@ public:
         return mNumberOfEffects;
     }
 
+    float getTargetFps() const { return mTargetFps; }
+    float getFixedDeltaTime() const { return mFixedDeltaTime; }
+
+    int tick(float now) {
+        if (!mInitialized) {
+            mLastTickTime = now;
+            mInitialized = true;
+        }
+
+        if (mFixedDeltaTime <= 0.0f) {
+            const float deltaTime = now - mLastTickTime;
+            mLastTickTime = now;
+            render(deltaTime, mElapsedTime);
+            mElapsedTime += deltaTime;
+            return 1;
+        }
+
+        if (mIsPaused) {
+            mLastTickTime = now;
+            return 0;
+        }
+
+        mAccumulator += now - mLastTickTime;
+        mLastTickTime = now;
+
+        const float maxAccumulation = mFixedDeltaTime * 5.0f;
+        if (mAccumulator > maxAccumulation) mAccumulator = maxAccumulation;
+
+        int framesProduced = 0;
+        while (mAccumulator >= mFixedDeltaTime) {
+            render(mFixedDeltaTime, mElapsedTime);
+            mElapsedTime += mFixedDeltaTime;
+            mAccumulator -= mFixedDeltaTime;
+            ++framesProduced;
+        }
+        return framesProduced;
+    }
+
+    void step() {
+        const float deltaTime = mFixedDeltaTime > 0.0f ? mFixedDeltaTime : 1.0f / 60.0f;
+        render(deltaTime, mElapsedTime);
+        mElapsedTime += deltaTime;
+    }
+
+    void setPaused(bool paused) {
+        mIsPaused = paused;
+        if (!paused) mAccumulator = 0.0f;
+    }
+    bool isPaused() const { return mIsPaused; }
 
     void render(float deltaTime, float elapsedTime) {
         auto& backBuffer = mSwapChain.getBackBuffer();
@@ -94,6 +150,14 @@ public:
 
 private:
     const Pixel* mPixels = nullptr;
+
+    float mTargetFps;
+    float mFixedDeltaTime;
+    float mAccumulator = 0.0f;
+    float mElapsedTime = 0.0f;
+    float mLastTickTime = 0.0f;
+    bool mInitialized = false;
+    bool mIsPaused = false;
 
     SwapChain<PIXEL_COUNT> mSwapChain;
     Color mScratchBuffer[PIXEL_COUNT];
