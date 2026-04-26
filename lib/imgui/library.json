@@ -1,6 +1,6 @@
 {
   "name": "imgui",
-  "version": "1.92.7-docking",
+  "version": "1.92.8-docking",
   "description": "Dear ImGui: Bloat-free Graphical User interface for C++ with minimal dependencies",
   "platforms": "native",
   "build": {
