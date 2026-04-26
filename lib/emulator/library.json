@@ -5,6 +5,7 @@
   "platforms": "native",
   "dependencies": {
     "led_engine": "*",
-    "imgui": "*"
+    "imgui": "*",
+    "glad": "*"
   }
 }
